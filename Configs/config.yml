@@ -1,0 +1,102 @@
+log_dir: "/stargan-v2/VCTK10_ESD10_demo_alt_with_pitch/"
+save_freq: 2
+device: "cuda"
+epochs: 80
+batch_size: 16
+pretrained_model: ""
+load_only_params: false
+fp16_run: true
+save_samples: true
+domain: "speakers"
+
+train_data: "/StarGAN_v2/Data/joint_train_list.txt"
+val_data: "/StarGAN_v2/Data/reduced_val_list.txt"
+
+sample_write_params:
+  sample_generate_data: "/StarGAN_v2/Data/joint_selected_val_list.txt"
+  selected_speakers:
+    - "273_0"
+    - "259_1"
+    - "258_2"
+    - "254_3"
+    - "244_9"
+    - "233_7"
+    - "230_6"
+    - "228_5"
+    - "0015_13"
+    - "0016_14"
+  sample_save_path: "/scratch/ardas/StarGAN_v2/output/samples/VCTK10_ESD10_demo_alt_with_pitch/"
+  real_sample_path: "/scratch/ardas/dataset/ESD/Emotional Speech Dataset (ESD)/0015/Surprise/train/0015_001502.wav"
+
+F0_path: "/scratch/ardas/StarGAN_v2/Utils/JDC/bst.t7"
+ASR_config: "/scratch/ardas/StarGAN_v2/Utils/ASR/config.yml"
+ASR_path: "/scratch/ardas/StarGAN_v2/Utils/ASR/epoch_00100.pth"
+
+
+preprocess_params:
+  sr: 24000
+  spect_params:
+    n_fft: 2048
+    win_length: 1200
+    hop_length: 300
+
+model_params:
+  dim_in: 64
+  style_dim: 64
+  latent_dim: 16
+  num_domains: 20
+  num_emotion_domain: 5
+  max_conv_dim: 512
+  n_repeat: 4
+  w_hpf: 0
+  F0_channel: 256
+  vocoder_path: "StarGAN_v2/checkpoint-1790000steps.pkl"
+  Emotion_encoder_path: "/stargan-v2/esdall_emotion_classifier_experiment_alternate_epochs200/epoch_00196.pth"
+
+
+loss_params:
+  g_loss:
+    lambda_sty: 1.
+    lambda_cyc: 5.
+    lambda_ds: 1.
+    lambda_norm: 1.
+    lambda_asr: 10.
+    lambda_f0: 5.
+    lambda_f0_sty: 0.0
+    lambda_adv: 2.
+    lambda_adv_cls: 0.5
+    use_aux_cls: true
+    lambda_aux_cls: 0.05
+    norm_bias: 0.5
+    feature_loss:
+      sr: 24000
+      feature_loss_epoch: 1
+      use_loudness_loss: false
+      use_log_loudness: false
+      use_norm_loudness: false
+      use_delta_loudness: false
+      lambda_loudness: 10.
+      use_spectral_centroid_loss: false
+      lambda_spectral_centroid: 5.0
+      use_spectral_kurtosis_loss: true
+      lambda_spectral_kurtosis: 2.5
+      use_deep_emotion_feature_loss: true
+      lambda_deep_emotion_feature: 2.0
+      use_f0_related_loss: false
+      lambda_f0_related_loss: 1.
+
+
+  d_loss:
+    use_emo_style_encoder : true
+    lambda_reg: 1.
+    lambda_adv_cls: 0.1
+    lambda_con_reg: 10.
+    use_aux_cls: true
+    lambda_aux_cls: 0.05
+  
+  adv_cls_epoch: 50
+  con_reg_epoch: 30
+  aux_cls_epoch: 5
+
+optimizer_params:
+  lr: 0.0001

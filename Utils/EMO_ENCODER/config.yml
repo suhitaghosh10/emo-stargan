@@ -1,0 +1,18 @@
+log_dir: "/project/ardas/experiments/stargan-v2/esdall_emotion_self_coding_stopLeakage_round3_epochs200/"
+device: "cuda"
+epochs: 200
+save_freq: 1
+batch_size: 256
+pretrained_model: ""
+load_only_params: false
+fp16_run: true
+domain: "emotions"
+
+train_data: "/scratch/ardas/dataset/ESD/Emotional Speech Dataset (ESD)/English_sub_set/train_list.txt"
+val_data: "/scratch/ardas/dataset/ESD/Emotional Speech Dataset (ESD)/English_sub_set/val_list.txt"
+
+optimizer_params:
+  lr: 0.0001
+
+loss_params:
+  lambda_coding_loss: 10.0

@@ -8,8 +8,6 @@ Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 """
 import os
 import os.path as osp
-os.environ['HTTP_PROXY'] = 'http://fp:3210/'
-os.environ['HTTPS_PROXY'] = 'http://fp:3210/'
 import copy
 import math
 

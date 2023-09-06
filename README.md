@@ -14,5 +14,7 @@ This repository contains the source code of the paper *[Emo-StarGAN: A Semi-Supe
   - [Ryerson Audio-Visual Database of Emotional Speech and Song (RAVDESS)](https://www.kaggle.com/datasets/uwrfkaggler/ravdess-emotional-speech-audio)
   - [Centre for Speech Technology Voice Cloning Toolkit (VCTK)](https://datashare.ed.ac.uk/handle/10283/2950)
 
+## Samples
+Samples can be found [here]()
 ## Training:
 coming soon...

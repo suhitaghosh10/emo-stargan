@@ -16,5 +16,22 @@ This repository contains the source code of the paper *[Emo-StarGAN: A Semi-Supe
 
 ## Samples
 Samples can be found [here]()
+
+## Pre-requisites:
+1. Python >= 3.7
+2. Install the following dependencies mentioned in the requirements.txt
+
 ## Training:
+
+### Before Training
+1. Before starting the training, please specify the number of target speaskers in `num_speaker_domains` and other details such as training and validation data in `config.yml` file.
+2. Download and copy the emotion embeddings [weights]() to the folder Utils/emotion_encoder
+3. Download and copy the vocoder [weights]() to the folder Utils/Vocoder
+
+### Train
+```bash
+python train.py --config_path ./Configs/speaker_domain_config.yml
+```
+## Inference
 coming soon...
+

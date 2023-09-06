@@ -9,8 +9,8 @@ fp16_run: true
 save_samples: true
 domain: "speakers"
 
-train_data: "/project/sghosh/code/emostargan/Data/joint_train_list.txt"
-val_data: "/project/sghosh/code/emostargan/Data/reduced_val_list.txt"
+train_data: "/project/sghosh/code/emostargan/Data/train_list.txt"
+val_data: "/project/sghosh/code/emostargan/Data/val_list.txt"
 
 sample_write_params:
   sample_generate_data: "/project/sghosh/code/emostargan/Data/joint_selected_val_list.txt"

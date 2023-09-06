@@ -13,7 +13,7 @@ from munch import Munch
 
 from Data.meldataset import build_dataloader
 from optimizers import build_optimizer
-from model_augmented import build_model
+from Models.models import build_model
 from trainer import Trainer
 from torch.utils.tensorboard import SummaryWriter
 

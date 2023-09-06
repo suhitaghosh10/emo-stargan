@@ -7,7 +7,7 @@ import librosa
 import torchaudio
 import numpy as np
 import soundfile as sf
-from model_augmented import StyleEncoder
+from Models.models import StyleEncoder
 from Utils.emotion_encoder.model import build_model
 import matplotlib.pyplot as plt
 

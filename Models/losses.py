@@ -6,7 +6,7 @@ import torchaudio
 from munch import Munch
 from transforms import build_transforms
 from Utils.constants import *
-from features import get_spectral_centroid, get_loudness
+from Models.features import get_spectral_centroid, get_loudness
 
 import torch.nn.functional as F
 def compute_d_loss(nets, args, x_real, y_org, sp_org, y_trg, z_trg=None, x_ref=None, use_r1_reg=True, use_adv_cls=False, use_con_reg=False, use_aux_cls=False):

@@ -6,18 +6,16 @@ This work is licensed under the Creative Commons Attribution-NonCommercial
 http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to
 Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 """
-
 import copy
 import math
 
-import whisper
 from munch import Munch
 import torch
 import torch.nn as nn
-from argparse import Namespace
 import torch.nn.functional as F
 from parallel_wavegan.utils import load_model
-#from UnsupSeg.next_frame_classifier import NextFrameClassifier
+from Utils.emotion_encoder.model import build_model as full_emo_bm
+
 
 class DownSample(nn.Module):
     def __init__(self, layer_type):
@@ -160,10 +158,16 @@ class HighPass(nn.Module):
 
 
 class Generator(nn.Module):
-    def __init__(self, dim_in=48, style_dim=48, max_conv_dim=48*8, w_hpf=1, F0_channel=0):
+    def __init__(self, dim_in=48, style_dim=48, max_conv_dim=48*8, w_hpf=1, F0_channel=0, F0_model = None):
         super().__init__()
 
         self.stem = nn.Conv2d(1, dim_in, 3, 1, 1)
+        #self.conv11_x = nn.Conv2d(512, 256, 1, 1)
+        self.proj_x_l1 = nn.Conv2d(512, 512, 1, 1)
+        self.proj_x_l2 = nn.Conv2d(512, 512, 1, 1)
+        self.proj_x_l3 = nn.Conv2d(512, 512, 1, 1)
+        self.x_norm = nn.InstanceNorm2d(512, affine=True)
+        self.F0_model = F0_model
         self.encode = nn.ModuleList()
         self.decode = nn.ModuleList()
         self.to_out = nn.Sequential(
@@ -194,34 +198,53 @@ class Generator(nn.Module):
         for _ in range(2):
             self.encode.append(
                 ResBlk(dim_out, dim_out, normalize=True))
-        
-        # F0 blocks 
+
+        # F0 blocks
         if F0_channel != 0:
             self.decode.insert(
                 0, AdainResBlk(dim_out + int(F0_channel / 2), dim_out, style_dim, w_hpf=w_hpf))
-        
+
         # bottleneck blocks (decoder)
         for _ in range(2):
             self.decode.insert(
                     0, AdainResBlk(dim_out + int(F0_channel / 2), dim_out + int(F0_channel / 2), style_dim, w_hpf=w_hpf))
-        
+
         if F0_channel != 0:
             self.F0_conv = nn.Sequential(
                 ResBlk(F0_channel, int(F0_channel / 2), normalize=True, downsample="half"),
             )
-        
+            self.F0_GRU_level1 = nn.GRU(int(F0_channel / 2)*5, int(F0_channel / 4)*5, 1, batch_first=True, bidirectional=True)
+            self.F0_GRU_level2 = nn.GRU(int(F0_channel / 2) * 5, int(F0_channel / 4) * 5, 2, batch_first=True,
+                                        bidirectional=True)
+            self.F0_GRU_level3 = nn.GRU(int(F0_channel/2) * 5, int(F0_channel / 4) * 5, 3, batch_first=True,
+                                        bidirectional=True)
+            self.F0_Norm = nn.InstanceNorm2d(int(F0_channel/2), affine=True)
+
+        # Added transformer layer
+        self.attention_layers_l1 = nn.ModuleList()
+        for i in range(1):
+            self.attention_layers_l1.append(
+                nn.TransformerEncoderLayer(d_model=2560, nhead=5, activation="relu", batch_first=True, dim_feedforward=2560))
+
+        self.attention_layers_l2 = nn.ModuleList()
+        for i in range(1):
+            self.attention_layers_l2.append(
+                nn.TransformerEncoderLayer(d_model=2560, nhead=5, activation="relu", batch_first=True,dim_feedforward=2560))
+
+        self.attention_layers_l3 = nn.ModuleList()
+        for i in range(1):
+            self.attention_layers_l3.append(
+                nn.TransformerEncoderLayer(d_model=2560, nhead=5, activation="relu", batch_first=True, dim_feedforward=2560))
+
 
         if w_hpf > 0:
             device = torch.device(
                 'cuda' if torch.cuda.is_available() else 'cpu')
             self.hpf = HighPass(w_hpf, device)
 
-        """# Added transformer layer
-        self.attention_layers = nn.ModuleList()
-        for i in range(3):
-            self.attention_layers.append(nn.TransformerEncoderLayer(d_model=80, nhead=16, activation="gelu", batch_first=True))"""
-
     def forward(self, x, s, masks=None, F0=None, training=False):
+        """if self.F0_model is not None:
+            F0 = self.F0_model.get_feature_GAN(x)"""
 
         x = self.stem(x)
         cache = {}
@@ -230,12 +253,10 @@ class Generator(nn.Module):
                 cache[x.size(2)] = x
             x = block(x)
 
-        if training:
-            x = x + torch.rand_like(x)*(0.005)
-            
         if F0 is not None:
             F0 = self.F0_conv(F0)
             F0 = F.adaptive_avg_pool2d(F0, [x.shape[-2], x.shape[-1]])
+
             x = torch.cat([x, F0], axis=1)
 
 
@@ -258,6 +279,17 @@ class Generator(nn.Module):
         x = x.view(x.size(0), channel, bins, frame)
 
         return x
+
+    def get_content_representation(self, x, masks=None):
+        x = self.stem(x)
+        cache = {}
+        for block in self.encode:
+            if (masks is not None) and (x.size(2) in [32, 64, 128]):
+                cache[x.size(2)] = x
+            x = block(x)
+
+        return x
+
 
 
 class MappingNetwork(nn.Module):
@@ -333,23 +365,11 @@ class StyleEncoder(nn.Module):
         h = h.view(h.size(0), -1)
         return h
 
-    def get_all_pojections(self, x):
-        h = self.shared(x)
-        h = h.view(h.size(0), -1)
-        out = []
-
-        for layer in self.unshared:
-            out += [layer(h)]
-
-        out = torch.stack(out, dim=1)
-        return out
-
-
 
 class Discriminator(nn.Module):
     def __init__(self, dim_in=48, num_speaker_domains=2, max_conv_dim=384, repeat_num=4):
         super().__init__()
-        
+
         # real/fake discriminator
         self.dis = Discriminator2d(dim_in=dim_in, num_speaker_domains=num_speaker_domains,
                                   max_conv_dim=max_conv_dim, repeat_num=repeat_num)
@@ -357,10 +377,10 @@ class Discriminator(nn.Module):
         self.cls = Discriminator2d(dim_in=dim_in, num_speaker_domains=num_speaker_domains,
                                   max_conv_dim=max_conv_dim, repeat_num=repeat_num)
         # auxiliary classifier while training on ESD
-        self.aux_cls = Discriminator2d(dim_in= dim_in, num_speaker_domains= 10,
+        self.aux_cls = Discriminator2d(dim_in= dim_in, num_speaker_domains= 5,
                                   max_conv_dim=max_conv_dim, repeat_num=repeat_num )
         self.num_speaker_domains = num_speaker_domains
-        
+
     def forward(self, x, y):
         return self.dis(x, y)
 
@@ -415,18 +435,21 @@ class Discriminator2d(nn.Module):
 
 
 def build_model(args, F0_model, ASR_model):
-    generator = Generator(args.dim_in, args.style_dim, args.max_conv_dim, w_hpf=args.w_hpf, F0_channel=args.F0_channel)
+    generator = Generator(args.dim_in, args.style_dim, args.max_conv_dim, w_hpf=args.w_hpf, F0_channel=args.F0_channel, F0_model=copy.deepcopy(F0_model))
     mapping_network = MappingNetwork(args.latent_dim, args.style_dim, args.num_speaker_domains, hidden_dim=args.max_conv_dim)
     style_encoder = StyleEncoder(args.dim_in, args.style_dim, args.num_speaker_domains, args.max_conv_dim)
     discriminator = Discriminator(args.dim_in, args.num_speaker_domains, args.max_conv_dim, args.n_repeat)
     vocoder = load_model(args.vocoder_path)
     vocoder.remove_weight_norm()
-    asr_alternate = whisper.load_model("small")
+
+    _, emotion_encoder = full_emo_bm()
+    model_params = torch.load(args.emotion_encoder_path, map_location='cpu')['model_ema']['coder']
+    emotion_encoder.coder.load_state_dict(model_params)
 
     generator_ema = copy.deepcopy(generator)
     mapping_network_ema = copy.deepcopy(mapping_network)
     style_encoder_ema = copy.deepcopy(style_encoder)
-        
+
     nets = Munch(generator=generator,
                  mapping_network=mapping_network,
                  style_encoder=style_encoder,
@@ -434,8 +457,8 @@ def build_model(args, F0_model, ASR_model):
                  f0_model=F0_model,
                  asr_model=ASR_model,
                  vocoder= vocoder,
-                 asr_alternate = asr_alternate)
-    
+                 emotion_encoder=emotion_encoder.coder)
+
     nets_ema = Munch(generator=generator_ema,
                      mapping_network=mapping_network_ema,
                      style_encoder=style_encoder_ema)

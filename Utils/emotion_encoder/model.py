@@ -3,7 +3,7 @@ import copy
 import torch
 import torch.nn as nn
 from munch import Munch
-from models import StyleEncoder
+from Models.style_module import StyleEncoder
 
 
 class EmoEncoder(nn.Module):

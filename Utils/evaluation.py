@@ -9,7 +9,7 @@ import soundfile as sf
 from munch import Munch
 from Utils.ASR.models import ASRCNN
 from Utils.JDC.model import JDCNet
-from model_augmented import Generator, MappingNetwork, StyleEncoder
+from Models.models import Generator, MappingNetwork, StyleEncoder
 from espnet_model_zoo.downloader import ModelDownloader
 from espnet2.bin.asr_inference import Speech2Text
 from parallel_wavegan.utils import load_model
@@ -158,7 +158,7 @@ ASR_model = ASR_model.to("cuda")
 _ = ASR_model.eval()
 
 # load vocoder
-vocoder = load_model("/StarGAN_v2/Vocoder/checkpoint-400000steps.pkl").to('cuda').eval()
+vocoder = load_model("/StarGAN_v2/vocoder/checkpoint-400000steps.pkl").to('cuda').eval()
 vocoder.remove_weight_norm()
 _ = vocoder.eval()
 

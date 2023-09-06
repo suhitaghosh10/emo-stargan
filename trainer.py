@@ -1,20 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import os
-import os.path as osp
-import sys
-import time
 from collections import defaultdict
 
 import librosa
 import numpy as np
 import torch
 from torch import nn
-from PIL import Image
 from tqdm import tqdm
 import torchaudio
 import soundfile as sf
-from losses import compute_d_loss, compute_g_loss
+from Models.losses import compute_d_loss, compute_g_loss
 
 import logging
 logger = logging.getLogger(__name__)

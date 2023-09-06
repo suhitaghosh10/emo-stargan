@@ -8,7 +8,7 @@ import warnings
 warnings.simplefilter('ignore')
 
 from munch import Munch
-from model_augmented import StyleEncoder
+from Models.models import StyleEncoder
 from Utils.emotion_encoder.dataset import build_dataloader
 from optimizers import build_optimizer
 from Utils.emotion_encoder.model import build_model

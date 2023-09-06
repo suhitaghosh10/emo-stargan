@@ -33,11 +33,10 @@ Samples can be found [here]()
 ```bash
 python train.py --config_path ./Configs/speaker_domain_config.yml
 ```
-## Inference
-coming soon...
 
 ### Model Weights
 The Emo-StarGAN model weights can be downloaded from [here](https://drive.google.com/drive/folders/1FKETSKT71L4GjSTexbJG6LcMWr0b1u7r?usp=sharing). 
+
 ## References
 - [yl4579/StarGANv2-VC](https://github.com/yl4579/StarGANv2-VC/)
 - [kan-bayashi/ParallelWaveGAN](https://github.com/kan-bayashi/ParallelWaveGAN)

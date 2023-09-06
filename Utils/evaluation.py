@@ -15,8 +15,6 @@ from espnet2.bin.asr_inference import Speech2Text
 from parallel_wavegan.utils import load_model
 
 os.environ['CUDA_VISIBLE_DEVICES'] = "2"
-os.environ['HTTP_PROXY'] = 'http://fp:3210/'
-os.environ['HTTPS_PROXY'] = 'http://fp:3210/'
 
 #@title Choose English ASR model { run: "auto" }
 lang = 'en'

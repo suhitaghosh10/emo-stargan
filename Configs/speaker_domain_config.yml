@@ -1,4 +1,4 @@
-log_dir: "/scratch/sughosh/stargan-v2/VCTK10_ESD10_demo_alt_with_pitch/"
+log_dir: "emostargan/VCTK10_ESD10_demo_alt_with_pitch/"
 save_freq: 2
 device: "cuda"
 epochs: 80
@@ -9,11 +9,11 @@ fp16_run: true
 save_samples: true
 domain: "speakers"
 
-train_data: "/project/sghosh/code/emostargan/Data/train_list.txt"
-val_data: "/project/sghosh/code/emostargan/Data/val_list.txt"
+train_data: "emostargan/Data/train_list.txt"
+val_data: "emostargan/Data/val_list.txt"
 
 sample_write_params:
-  sample_generate_data: "/project/sghosh/code/emostargan/Data/joint_selected_val_list.txt"
+  sample_generate_data: "emostargan/Data/joint_selected_val_list.txt"
   selected_speakers:
     - "273_0"
     - "259_1"
@@ -25,12 +25,12 @@ sample_write_params:
     - "228_5"
     - "0015_13"
     - "0016_14"
-  sample_save_path: "/scratch/sughosh/StarGAN_v2/output/samples/VCTK10_ESD10_demo_alt_with_pitch/"
-  real_sample_path: "/scratch/sughosh/Dataset/ESD/Emotional Speech Dataset (ESD)/0015/Surprise/train/0015_001502.wav"
+  sample_save_path: "emostargan/output/samples/VCTK10_ESD10_demo_alt_with_pitch/"
+  real_sample_path: "Dataset/ESD/Emotional Speech Dataset (ESD)/0015/Surprise/train/0015_001502.wav"
 
-F0_path: "/project/sghosh/code/emostargan/Utils/JDC/bst.t7"
-ASR_config: "/project/sghosh/code/emostargan/Utils/ASR/config.yml"
-ASR_path: "/project/sghosh/code/emostargan/Utils/ASR/epoch_00100.pth"
+F0_path: "emostargan/Utils/JDC/bst.t7"
+ASR_config: "emostargan/Utils/ASR/config.yml"
+ASR_path: "emostargan/Utils/ASR/epoch_00100.pth"
 
 
 preprocess_params:
@@ -50,8 +50,8 @@ model_params:
   n_repeat: 4
   w_hpf: 0
   F0_channel: 256
-  vocoder_path: "/project/sghosh/code/emostargan/Utils/Vocoder/checkpoint-2500000steps.pkl"
-  emotion_encoder_path: "/project/sghosh/code/emostargan/Utils/emotion_encoder/emotion_embedding_second_stage.pth"
+  vocoder_path: "emostargan/Utils/Vocoder/checkpoint-2500000steps.pkl"
+  emotion_encoder_path: "emostargan/Utils/emotion_encoder/emotion_embedding_second_stage.pth"
 
 
 loss_params:

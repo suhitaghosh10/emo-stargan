@@ -1,0 +1,10 @@
+./Data/p273/94.wav|19
+./Data/p259/102.wav|17
+./Data/p258/144.wav|16
+./Data/p243/117.wav|13
+./Data/p254/92.wav|14
+./Data/p244/40.wav|9
+./Data/p236/4.wav|6
+./Data/p233/35.wav|5
+./Data/p230/170.wav|3
+./Data/p228/114.wav|1

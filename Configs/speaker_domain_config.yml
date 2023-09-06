@@ -1,19 +1,19 @@
-log_dir: "/stargan-v2/VCTK10_ESD10_demo_alt_with_pitch/"
+log_dir: "/scratch/sughosh/stargan-v2/VCTK10_ESD10_demo_alt_with_pitch/"
 save_freq: 2
 device: "cuda"
 epochs: 80
-batch_size: 16
+batch_size: 64
 pretrained_model: ""
 load_only_params: false
 fp16_run: true
 save_samples: true
 domain: "speakers"
 
-train_data: "/StarGAN_v2/Data/joint_train_list.txt"
-val_data: "/StarGAN_v2/Data/reduced_val_list.txt"
+train_data: "/project/sghosh/code/emostargan/Data/joint_train_list.txt"
+val_data: "/project/sghosh/code/emostargan/Data/reduced_val_list.txt"
 
 sample_write_params:
-  sample_generate_data: "/StarGAN_v2/Data/joint_selected_val_list.txt"
+  sample_generate_data: "/project/sghosh/code/emostargan/Data/joint_selected_val_list.txt"
   selected_speakers:
     - "273_0"
     - "259_1"
@@ -25,12 +25,12 @@ sample_write_params:
     - "228_5"
     - "0015_13"
     - "0016_14"
-  sample_save_path: "/scratch/ardas/StarGAN_v2/output/samples/VCTK10_ESD10_demo_alt_with_pitch/"
-  real_sample_path: "/scratch/ardas/dataset/ESD/Emotional Speech Dataset (ESD)/0015/Surprise/train/0015_001502.wav"
+  sample_save_path: "/scratch/sughosh/StarGAN_v2/output/samples/VCTK10_ESD10_demo_alt_with_pitch/"
+  real_sample_path: "/scratch/sughosh/Dataset/ESD/Emotional Speech Dataset (ESD)/0015/Surprise/train/0015_001502.wav"
 
-F0_path: "/scratch/ardas/StarGAN_v2/Utils/JDC/bst.t7"
-ASR_config: "/scratch/ardas/StarGAN_v2/Utils/ASR/config.yml"
-ASR_path: "/scratch/ardas/StarGAN_v2/Utils/ASR/epoch_00100.pth"
+F0_path: "/project/sghosh/code/emostargan/Utils/JDC/bst.t7"
+ASR_config: "/project/sghosh/code/emostargan/Utils/ASR/config.yml"
+ASR_path: "/project/sghosh/code/emostargan/Utils/ASR/epoch_00100.pth"
 
 
 preprocess_params:
@@ -44,14 +44,14 @@ model_params:
   dim_in: 64
   style_dim: 64
   latent_dim: 16
-  num_domains: 20
+  num_speaker_domains: 20
   num_emotion_domain: 5
   max_conv_dim: 512
   n_repeat: 4
   w_hpf: 0
   F0_channel: 256
-  vocoder_path: "StarGAN_v2/checkpoint-1790000steps.pkl"
-  Emotion_encoder_path: "/stargan-v2/esdall_emotion_classifier_experiment_alternate_epochs200/epoch_00196.pth"
+  vocoder_path: "/project/sghosh/code/emostargan/Utils/Vocoder/checkpoint-2500000steps.pkl"
+  emotion_encoder_path: "/project/sghosh/code/emostargan/Utils/emotion_encoder/emotion_embedding_second_stage.pth"
 
 
 loss_params:
@@ -77,6 +77,7 @@ loss_params:
       use_delta_loudness: false
       lambda_loudness: 10.
       use_spectral_centroid_loss: false
+      use_spectral_bandwidth_loss: false
       lambda_spectral_centroid: 5.0
       use_spectral_kurtosis_loss: true
       lambda_spectral_kurtosis: 2.5

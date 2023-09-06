@@ -7,8 +7,8 @@ import librosa
 import torchaudio
 import numpy as np
 import soundfile as sf
-from models import StyleEncoder
-from Utils.EMO_ENCODER.model import build_model
+from model_augmented import StyleEncoder
+from Utils.emotion_encoder.model import build_model
 import matplotlib.pyplot as plt
 
 
@@ -23,7 +23,7 @@ MEL_PARAMS = {
 to_melspec = torchaudio.transforms.MelSpectrogram(**MEL_PARAMS)
 mean, std = -4, 4
 max_mel_length = 192
-wave_path_orig = "/scratch/ardas/dataset/ESD/Emotional Speech Dataset (ESD)/0015/Surprise/train/0015_001502.wav"
+wave_path_orig = "/scratch/ardas/Dataset/ESD/Emotional Speech Dataset (ESD)/0015/Surprise/train/0015_001502.wav"
 wave_path_conv = "/scratch/ardas/StarGAN_v2/output/samples/VCTK10_ESD10_baseline_withPitch/epoch_75_3__Neutral_0012_000014_target_273.wav"
 
 

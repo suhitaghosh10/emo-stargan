@@ -11,8 +11,8 @@ class EmoEncoder(nn.Module):
         super().__init__()
 
         self.encoder = StyleEncoder(64, 64, 5, 512)
-        #"/project/ardas/experiments/stargan-v2/esdall_vox5_epochs200/"
-        model_params = torch.load("/project/ardas/experiments/stargan-v2/esdall_emotion_conversion_aux_classifier_epochs200/epoch_00198.pth",
+        # first stage pre-trained emotion style encoder
+        model_params = torch.load("/project/sghosh/code/emostargan/Utils/emotion_encoder/emotion_style_encoder_pretrained_first_stage.pth",
                                   map_location='cpu')['model']['style_encoder']
         self.encoder.load_state_dict(model_params)
 

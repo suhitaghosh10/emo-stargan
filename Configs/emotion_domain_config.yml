@@ -1,4 +1,4 @@
-log_dir: "/experiments/stargan-v2/esdall_emotion_conversion_aux_classifier_epochs200/"
+log_dir: "/experiments/stargan-v2/log/"
 save_freq: 2
 device: "cuda"
 epochs: 200
@@ -9,11 +9,11 @@ fp16_run: true
 save_samples: true
 domain: "emotions"
 
-train_data: "/dataset/ESD/Emotional Speech Dataset (ESD)/English_sub_set/train_list.txt"
-val_data: "/dataset/ESD/Emotional Speech Dataset (ESD)/English_sub_set/val_list.txt"
+train_data: "/Dataset/ESD/Emotional Speech Dataset (ESD)/English_sub_set/train_list.txt"
+val_data: "/Dataset/ESD/Emotional Speech Dataset (ESD)/English_sub_set/val_list.txt"
 
 sample_write_params:
-  sample_generate_data: "/dataset/ESD/Emotional Speech Dataset (ESD)/English_sub_set/selected_val_list.txt"
+  sample_generate_data: "/Dataset/ESD/Emotional Speech Dataset (ESD)/English_sub_set/selected_val_list.txt"
   selected_speakers:
     - "Surprise_0"
     - "Sad_1"
@@ -21,10 +21,10 @@ sample_write_params:
     - "Happy_3"
     - "Angry_4"
   sample_save_path: "/StarGAN_v2/output/samples/emotion_conversion_aux_classifier/"
-  real_sample_path: "/dataset/ESD/Emotional Speech Dataset (ESD)/0012/Neutral/evaluation/0012_000004.wav"
+  real_sample_path: "/Dataset/ESD/Emotional Speech Dataset (ESD)/0012/Neutral/evaluation/0012_000004.wav"
 
 F0_path: "/StarGAN_v2/Utils/JDC/bst.t7"
-ASR_config: "/StarGAN_v2/Utils/ASR/config.yml"
+ASR_config: "/StarGAN_v2/Utils/ASR/speaker_domain_config.yml"
 ASR_path: "/StarGAN_v2/Utils/ASR/epoch_00100.pth"
 
 preprocess_params:
@@ -45,8 +45,7 @@ model_params:
   w_hpf: 0
   F0_channel: 256
   vocoder_path: "/StarGAN_v2/Vocoder/checkpoint-400000steps.pkl"
-  phon_seg_model_path: "/StarGAN_v2/UnsupSeg/pretrained_models/timit_pretrained.ckpt"
-  Emotion_encoder_path: "/experiments/stargan-v2/esdall_vox5_epochs200/epoch_00198.pth"
+  emotion_encoder_path: "/experiments/stargan-v2/esdall_vox5_epochs200/epoch_00198.pth"
 
 loss_params:
   g_loss:

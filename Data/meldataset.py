@@ -1,10 +1,18 @@
-import torch
+#coding: utf-8
+
+import os
+import time
 import random
-import librosa
+import random
+import torch
 import torchaudio
+
+import librosa
 import numpy as np
 import soundfile as sf
-from features import torch_like_frame
+import torch.nn.functional as F
+
+from torch import nn
 from torch.utils.data import DataLoader
 
 import logging
@@ -14,26 +22,43 @@ logger.setLevel(logging.DEBUG)
 np.random.seed(1)
 random.seed(1)
 
+SPECT_PARAMS = {
+    "n_fft": 2048,
+    "win_length": 1200,
+    "hop_length": 300
+}
 MEL_PARAMS = {
     "n_mels": 80,
     "n_fft": 2048,
     "win_length": 1200,
     "hop_length": 300
 }
-P0  = 2e-5
 
+EMO_DICT = {
+    "Surprise" : 0,
+    "Sad" : 1,
+    "Neutral" : 2,
+    "Happy" : 3,
+    "Angry" : 4
+}
+
+EMO_DB_DICT = {
+    "W" : 0,
+    "F" : 1,
+    "T" : 2,
+    "N" : 3
+}
 
 class MelDataset(torch.utils.data.Dataset):
     def __init__(self,
                  data_list,
                  sr=24000,
                  validation=False,
-                 domain=None,
-                 random_start = True
+                 domain=None
                  ):
 
         _data_list = [l[:-1].split('|') for l in data_list]
-        self.data_list = [(path, int(label.replace('p', ''))) for path, label in _data_list]
+        self.data_list = [(path, int(label.replace('p',''))) for path, label in _data_list]
         self.data_list_per_class = {
             target: [(path, label) for path, label in self.data_list if label == target] \
             for target in list(set([label for _, label in self.data_list]))}
@@ -45,7 +70,6 @@ class MelDataset(torch.utils.data.Dataset):
         self.validation = validation
         self.max_mel_length = 192
         self.domain = domain
-        self.random_start = random_start
 
     def __len__(self):
         return len(self.data_list)
@@ -53,13 +77,24 @@ class MelDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         data = self.data_list[idx]
         mel_tensor, label = self._load_data(data)
-
-        return mel_tensor, label
-
+        if self.domain == "emotions":
+            sp_label = int(data[0].split("/")[-1].split("_")[0]) - 11
+        elif "ESD" in data[0]:
+            sp_label = EMO_DICT[data[0].split("/")[7]]
+        elif "EmoDB" in data[0]:
+            sp_label = EMO_DB_DICT[data[0].split("/")[-1][5]]
+        else:
+            sp_label = -1
+        ref_data = random.choice(self.data_list)
+        ref_mel_tensor, ref_label = self._load_data(ref_data)
+        ref2_data = random.choice(self.data_list_per_class[ref_label])
+        ref2_mel_tensor, _ = self._load_data(ref2_data)
+        return mel_tensor, label, sp_label, ref_mel_tensor, ref2_mel_tensor, ref_label
+    
     def _load_data(self, path):
         wave_tensor, label = self._load_tensor(path)
-
-        if not self.validation:  # random scale for robustness
+        
+        if not self.validation: # random scale for robustness
             random_scale = 0.5 + 0.5 * np.random.random()
             wave_tensor = random_scale * wave_tensor
 
@@ -67,10 +102,7 @@ class MelDataset(torch.utils.data.Dataset):
         mel_tensor = (torch.log(1e-5 + mel_tensor) - self.mean) / self.std
         mel_length = mel_tensor.size(1)
         if mel_length > self.max_mel_length:
-            if self.random_start:
-                random_start = np.random.randint(0, mel_length - self.max_mel_length)
-            else:
-                random_start = 2
+            random_start = np.random.randint(0, mel_length - self.max_mel_length)
             mel_tensor = mel_tensor[:, random_start:random_start + self.max_mel_length]
 
         return mel_tensor, label
@@ -89,8 +121,12 @@ class MelDataset(torch.utils.data.Dataset):
         wave_tensor = torch.from_numpy(wave).float()
         return wave_tensor, label
 
-
 class Collater(object):
+    """
+    Args:
+      adaptive_batch_size (bool): if true, decrease batch size when long data comes.
+    """
+
     def __init__(self, return_wave=False):
         self.text_pad_index = 0
         self.return_wave = return_wave
@@ -103,15 +139,30 @@ class Collater(object):
         nmels = batch[0][0].size(0)
         mels = torch.zeros((batch_size, nmels, self.max_mel_length)).float()
         labels = torch.zeros((batch_size)).long()
+        sp_labels = torch.zeros((batch_size)).long()
+        ref_mels = torch.zeros((batch_size, nmels, self.max_mel_length)).float()
+        ref2_mels = torch.zeros((batch_size, nmels, self.max_mel_length)).float()
+        ref_labels = torch.zeros((batch_size)).long()
 
-        for bid, (mel, label) in enumerate(batch):
+        for bid, (mel, label, sp_label, ref_mel, ref2_mel, ref_label) in enumerate(batch):
             mel_size = mel.size(1)
             mels[bid, :, :mel_size] = mel
+            
+            ref_mel_size = ref_mel.size(1)
+            ref_mels[bid, :, :ref_mel_size] = ref_mel
+            
+            ref2_mel_size = ref2_mel.size(1)
+            ref2_mels[bid, :, :ref2_mel_size] = ref2_mel
+            
             labels[bid] = label
+            sp_labels[bid] = sp_label
+            ref_labels[bid] = ref_label
 
-
-        mels = mels.unsqueeze(1)
-        return mels, labels
+        z_trg = torch.randn(batch_size, self.latent_dim)
+        z_trg2 = torch.randn(batch_size, self.latent_dim)
+        
+        mels, ref_mels, ref2_mels = mels.unsqueeze(1), ref_mels.unsqueeze(1), ref2_mels.unsqueeze(1)
+        return mels, labels, sp_labels, ref_mels, ref2_mels, ref_labels, z_trg, z_trg2
 
 def build_dataloader(path_list,
                      validation=False,
@@ -120,10 +171,9 @@ def build_dataloader(path_list,
                      device='cpu',
                      collate_config={},
                      dataset_config={},
-                     domain=None,
-                     random_start= True):
+                     domain=None):
 
-    dataset = MelDataset(path_list, validation=validation, domain =domain, random_start=random_start)
+    dataset = MelDataset(path_list, validation=validation, domain =domain)
     collate_fn = Collater(**collate_config)
     data_loader = DataLoader(dataset,
                              batch_size=batch_size,

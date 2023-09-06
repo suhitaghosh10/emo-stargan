@@ -1,29 +1,12 @@
 #coding:utf-8
 
-import os
-
 import librosa
 import torch
 import torchaudio
-import numpy as np
 from munch import Munch
-from skimage import filters
-from torch_stoi import NegSTOILoss
 from transforms import build_transforms
-from features import get_loudness, frame, get_formants, torch_like_frame, get_TEO, get_teo_cb_Auto
-
-MEL_PARAMS = {
-    "n_mels": 80,
-    "n_fft": 2048,
-    "win_length": 1200,
-    "hop_length": 300
-}
-
-COS = 'cos'
-PEARSON = 'pearson'
-L1_LOSS = 'l1'
-DOT = 'dot'
-DTW = 'soft-dtw'
+from Utils.constants import *
+from features import get_spectral_centroid, get_loudness
 
 import torch.nn.functional as F
 def compute_d_loss(nets, args, x_real, y_org, sp_org, y_trg, z_trg=None, x_ref=None, use_r1_reg=True, use_adv_cls=False, use_con_reg=False, use_aux_cls=False):
@@ -65,7 +48,7 @@ def compute_d_loss(nets, args, x_real, y_org, sp_org, y_trg, z_trg=None, x_ref=N
         out_aug = nets.discriminator(t(x_fake).detach(), y_trg)
         loss_con_reg += F.smooth_l1_loss(out, out_aug)
     
-    # adversarial classifier loss
+    # adversarial classifier losses
     if use_adv_cls:
         out_de = nets.discriminator.classifier(x_fake)
         loss_real_adv_cls = F.cross_entropy(out_de[y_org != y_trg], y_org[y_org != y_trg])
@@ -118,7 +101,7 @@ def compute_g_loss(nets, args, x_real, y_org, sp_org, y_trg, z_trgs=None, x_refs
         ASR_real = nets.asr_model.get_feature(x_real)
 
 
-    # adversarial loss
+    # adversarial losses
     x_fake = nets.generator(x_real, s_trg, masks=None, F0=GAN_F0_real)
     out = nets.discriminator(x_fake, y_trg) 
     loss_adv = adv_loss(out, 1)
@@ -127,7 +110,7 @@ def compute_g_loss(nets, args, x_real, y_org, sp_org, y_trg, z_trgs=None, x_refs
     F0_fake, GAN_F0_fake, _ = nets.f0_model(x_fake)
     ASR_fake = nets.asr_model.get_feature(x_fake)
 
-    # diversity sensitive loss
+    # diversity sensitive losses
     if z_trgs is not None:
         s_trg2 = nets.mapping_network(z_trg2, y_trg)
     else:
@@ -138,7 +121,7 @@ def compute_g_loss(nets, args, x_real, y_org, sp_org, y_trg, z_trgs=None, x_refs
     loss_ds = torch.mean(torch.abs(x_fake - x_fake2))
     loss_ds += F.smooth_l1_loss(GAN_F0_fake, GAN_F0_fake2.detach())
 
-    # handcrafted feature loss
+    # handcrafted feature losses
     if use_feature_loss:
         mel_fake = x_fake.transpose(-1, -2).squeeze()
         mel_real = x_real.transpose(-1, -2).squeeze()
@@ -150,7 +133,7 @@ def compute_g_loss(nets, args, x_real, y_org, sp_org, y_trg, z_trgs=None, x_refs
         wav_fake = torch.stack(wav_fake, dim=0).squeeze()
 
         if feature_loss_param.use_loudness_loss:
-            # loudness loss
+            # loudness losses
             loudness_real = get_loudness(wav_real.squeeze())
             loudness_fake = get_loudness(wav_fake.squeeze())
             if feature_loss_param.use_log_loudness:
@@ -171,8 +154,7 @@ def compute_g_loss(nets, args, x_real, y_org, sp_org, y_trg, z_trgs=None, x_refs
 
         if feature_loss_param.use_spectral_centroid_loss \
                 or feature_loss_param.use_spectral_bandwidth_loss:
-            to_spectral_centroid = torchaudio.transforms.SpectralCentroid(sample_rate = feature_loss_param.sr, n_fft=MEL_PARAMS["n_fft"],
-                                                                          win_length=512, hop_length=256)\
+            to_spectral_centroid = get_spectral_centroid(feature_loss_param) \
                 .to(wav_fake.device)
             sc_fake = to_spectral_centroid(wav_fake)
             sc_real = to_spectral_centroid(wav_real)
@@ -211,9 +193,7 @@ def compute_g_loss(nets, args, x_real, y_org, sp_org, y_trg, z_trgs=None, x_refs
                                                                hop_length=256,
                                                                normalized=False, power=2., return_complex=True).to(
                 wav_fake.device)
-            to_spectral_centroid = torchaudio.transforms.SpectralCentroid(sample_rate=feature_loss_param.sr,
-                                                                          n_fft=MEL_PARAMS["n_fft"],
-                                                                          win_length=512, hop_length=256) \
+            to_spectral_centroid = get_spectral_centroid(feature_loss_param) \
                 .to(wav_fake.device)
             sc_fake = to_spectral_centroid(wav_fake).unsqueeze(-1)
             sc_real = to_spectral_centroid(wav_real).unsqueeze(-1)
@@ -289,40 +269,40 @@ def compute_g_loss(nets, args, x_real, y_org, sp_org, y_trg, z_trgs=None, x_refs
         deep_emo_feature_loss = torch.zeros(1).mean()
         f0_related_loss = torch.zeros(1).mean()
     
-    # norm consistency loss
+    # norm consistency losses
     x_fake_norm = log_norm(x_fake)
     x_real_norm = log_norm(x_real)
     loss_norm = ((torch.nn.ReLU()(torch.abs(x_fake_norm - x_real_norm) - args.norm_bias))**2).mean()
     
-    # F0 loss
+    # F0 losses
     loss_f0 = f0_loss(F0_fake, F0_real)
     
-    # style F0 loss (style initialization)
+    # style F0 losses (style initialization)
     if x_refs is not None and args.lambda_f0_sty > 0 and not use_adv_cls:
         F0_sty, _, _ = nets.f0_model(x_ref)
         loss_f0_sty = F.l1_loss(compute_mean_f0(F0_fake), compute_mean_f0(F0_sty))
     else:
         loss_f0_sty = torch.zeros(1).mean()
     
-    # ASR loss
+    # ASR losses
     loss_asr = F.smooth_l1_loss(ASR_fake, ASR_real)
     
-    # style reconstruction loss
+    # style reconstruction losses
     s_pred = nets.style_encoder(x_fake, y_trg)
     loss_sty = torch.mean(torch.abs(s_pred - s_trg))
     
-    # cycle-consistency loss
+    # cycle-consistency losses
     s_org = nets.style_encoder(x_real, y_org)
     x_rec = nets.generator(x_fake, s_org, masks=None, F0=GAN_F0_fake)
     loss_cyc = torch.mean(torch.abs(x_rec - x_real))
 
-    # content preservation loss
+    # content preservation losses
     loss_cyc += F.smooth_l1_loss(nets.generator.get_content_representation(x_fake.detach()),
                                  nets.generator.get_content_representation(x_real.detach()).detach())
     loss_cyc += F.smooth_l1_loss(nets.generator.get_content_representation(x_fake2.detach()),
                                  nets.generator.get_content_representation(x_real.detach()).detach())
 
-    # F0 loss in cycle-consistency loss
+    # F0 losses in cycle-consistency losses
     if args.lambda_f0 > 0:
         _, _, cyc_F0_rec = nets.f0_model(x_rec)
         loss_cyc += F.smooth_l1_loss(cyc_F0_rec, cyc_F0_real)
@@ -331,7 +311,7 @@ def compute_g_loss(nets, args, x_real, y_org, sp_org, y_trg, z_trgs=None, x_refs
 
         loss_cyc += F.smooth_l1_loss(ASR_recon, ASR_real)
     
-    # adversarial classifier loss
+    # adversarial classifier losses
     if use_adv_cls:
         out_de = nets.discriminator.classifier(x_fake)
         loss_adv_cls = F.cross_entropy(out_de[y_org != y_trg], y_trg[y_org != y_trg])
@@ -354,7 +334,6 @@ def compute_g_loss(nets, args, x_real, y_org, sp_org, y_trg, z_trgs=None, x_refs
            + args.lambda_aux_cls * loss_aux_cls \
            + feature_loss_param.lambda_loudness * loudness_loss \
            + feature_loss_param.lambda_spectral_centroid * sc_loss \
-           + feature_loss_param.lambda_spectral_bandwidth * sb_loss \
            + feature_loss_param.lambda_spectral_kurtosis * kurtosis_loss \
            + feature_loss_param.lambda_deep_emotion_feature * deep_emo_feature_loss \
            + feature_loss_param.lambda_f0_related_loss * f0_related_loss
@@ -374,8 +353,9 @@ def compute_g_loss(nets, args, x_real, y_org, sp_org, y_trg, z_trgs=None, x_refs
                        kurtosis_loss=kurtosis_loss.item(),
                        deep_emo_feature_loss=deep_emo_feature_loss.item(),
                        f0_related_loss=f0_related_loss.item())
-    
-# for norm consistency loss
+
+
+# for norm consistency losses
 def log_norm(x, mean=-4, std=4, dim=2):
     """
     normalized log mel -> mel -> norm -> log(norm)
@@ -383,7 +363,7 @@ def log_norm(x, mean=-4, std=4, dim=2):
     x = torch.log(torch.exp(x * std + mean).norm(dim=dim))
     return x
 
-# for adversarial loss
+# for adversarial losses
 def adv_loss(logits, target):
     assert target in [1, 0]
     if len(logits.shape) > 1:
@@ -393,7 +373,7 @@ def adv_loss(logits, target):
     loss = F.binary_cross_entropy_with_logits(logits, targets)
     return loss
 
-# for R1 regularization loss
+# for R1 regularization losses
 def r1_reg(d_out, x_in):
     # zero-centered gradient penalty for real images
     batch_size = x_in.size(0)
@@ -406,7 +386,7 @@ def r1_reg(d_out, x_in):
     reg = 0.5 * grad_dout2.view(batch_size, -1).sum(1).mean(0)
     return reg
 
-# for F0 consistency loss
+# for F0 consistency losses
 def compute_mean_f0(f0):
     f0_mean = f0.mean(-1)
     f0_mean = f0_mean.expand(f0.shape[-1], f0_mean.shape[0]).transpose(0, 1) # (B, M)

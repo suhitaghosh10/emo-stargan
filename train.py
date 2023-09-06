@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-#coding:utf-8
 
 import os
 os.environ['CUDA_VISIBLE_DEVICES'] = "0"
@@ -13,7 +11,7 @@ warnings.simplefilter('ignore')
 
 from munch import Munch
 
-from meldataset import build_dataloader
+from Data.meldataset import build_dataloader
 from optimizers import build_optimizer
 from model_augmented import build_model
 from trainer import Trainer
@@ -33,7 +31,7 @@ logger.addHandler(handler)
 torch.backends.cudnn.benchmark = True
 
 @click.command()
-@click.option('-p', '--config_path', default='Configs/config.yml', type=str)
+@click.option('-p', '--config_path', default='Configs/speaker_domain_config.yml', type=str)
 
 def main(config_path):
     config = yaml.safe_load(open(config_path))
@@ -55,7 +53,6 @@ def main(config_path):
     save_freq = config.get('save_freq', 20)
     train_path = config.get('train_data', None)
     val_path = config.get('val_data', None)
-    stage = config.get('stage', 'star')
     fp16_run = config.get('fp16_run', False)
     sample_generation_param = config.get('sample_write_params',False)
     domain = config.get('domain')
@@ -94,7 +91,6 @@ def main(config_path):
     F0_path = config.get('F0_path', False)
     F0_model = JDCNet(num_class=1, seq_len=192)
     params = torch.load(F0_path, map_location='cpu')['net']
-    #params = torch.load(F0_path, map_location='cpu')['model']
     F0_model.load_state_dict(params)
     
     # build model
@@ -141,7 +137,7 @@ def main(config_path):
         for key, value in results.items():
             if isinstance(value, float):
                 txt = txt + key + ':'+ format(value, ".4f") + '  '
-                #logger.info('%-15s: %.4f' % (key, value))
+                logger.info('%-15s: %.4f' % (key, value))
                 writer.add_scalar(key, value, epoch)
             else:
                 for v in value:

@@ -1,9 +1,9 @@
-import math
 import torch
 import librosa
 import numpy as np
 import torchaudio.functional as F
 import torchaudio
+from Utils.constants import MEL_PARAMS
 
 def get_loudness(batched_waveform : torch.Tensor, n_fft: int = 124, hop_length: int = 64, sampling_rate :int = 16000 ) -> torch.Tensor:
     """
@@ -58,3 +58,8 @@ def torch_like_frame(signal, frame_length, frame_step, pad_mode="reflect" ):
     input = torch.nn.functional.pad(signal.view(extended_shape), [pad, pad-1], pad_mode)
     input = input.view(input.shape[-signal_dim:])
     return input.unfold(-1, frame_length, frame_step)
+
+def get_spectral_centroid(feature_loss_param):
+    return torchaudio.transforms.SpectralCentroid(sample_rate=feature_loss_param.sr,
+                                                  n_fft=MEL_PARAMS["n_fft"],
+                                                  win_length=512, hop_length=256)

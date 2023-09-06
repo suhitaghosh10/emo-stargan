@@ -1,7 +1,4 @@
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = "1"
-import sys
-sys.path.append("/project/ardas/StarGAN_v2/")
 import os.path as osp
 import yaml
 import shutil
@@ -11,11 +8,11 @@ import warnings
 warnings.simplefilter('ignore')
 
 from munch import Munch
-from models import StyleEncoder
-from Utils.EMO_ENCODER.dataset import build_dataloader
+from model_augmented import StyleEncoder
+from Utils.emotion_encoder.dataset import build_dataloader
 from optimizers import build_optimizer
-from Utils.EMO_ENCODER.model import build_model
-from Utils.EMO_ENCODER.trainer import Trainer
+from Utils.emotion_encoder.model import build_model
+from Utils.emotion_encoder.trainer import Trainer
 from torch.utils.tensorboard import SummaryWriter
 
 
@@ -30,7 +27,7 @@ logger.addHandler(handler)
 torch.backends.cudnn.benchmark = True
 
 @click.command()
-@click.option('-p', '--config_path', default='/project/ardas/StarGAN_v2/Utils/EMO_ENCODER/config.yml', type=str)
+@click.option('-p', '--config_path', default='/project/sghosh/code/emostargan/Utils/emotion_encoder/config.yml', type=str)
 
 def main(config_path):
     config = yaml.safe_load(open(config_path))
@@ -72,9 +69,7 @@ def main(config_path):
 
     #ground_truth model
     GT_Model = StyleEncoder(64, 64, 5, 512)
-    """GT_Model_params = torch.load("/project/ardas/experiments/stargan-v2/esdall_vox5_epochs200/epoch_00198.pth",
-                              map_location='cpu')['model']['style_encoder']"""
-    GT_Model_params = torch.load("/project/ardas/experiments/stargan-v2/esdall_emotion_conversion_aux_classifier_epochs200/epoch_00198.pth",
+    GT_Model_params = torch.load("emotion_style_encoder_pretrained_first_stage.pth",
                                  map_location='cpu')['model']['style_encoder']
     GT_Model.load_state_dict(GT_Model_params)
     GT_Model.to(device)
@@ -122,7 +117,7 @@ def main(config_path):
                     writer.add_figure('eval_spec', v, epoch)
         logger.info(txt)
         if results["eval/coding_loss"] < eval_loss:
-            text = "Evalulation loss " +  str(results["eval/coding_loss"]) + " is better than " + str(eval_loss) + ". Hence saving the model."
+            text = "Evalulation losses " +  str(results["eval/coding_loss"]) + " is better than " + str(eval_loss) + ". Hence saving the model."
             logger.info(text)
             trainer.save_checkpoint(osp.join(log_dir, 'epoch_%05d.pth' % epoch))
             eval_loss = results["eval/coding_loss"]

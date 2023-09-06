@@ -1,4 +1,4 @@
-log_dir: "/experiments/stargan-v2/log/"
+log_dir: "emostargan/experiments/stargan-v2/log/"
 save_freq: 2
 device: "cuda"
 epochs: 200
@@ -20,12 +20,12 @@ sample_write_params:
     - "Neutral_2"
     - "Happy_3"
     - "Angry_4"
-  sample_save_path: "/StarGAN_v2/output/samples/emotion_conversion_aux_classifier/"
+  sample_save_path: "/emostargan/output/samples/emotion_conversion_aux_classifier/"
   real_sample_path: "/Dataset/ESD/Emotional Speech Dataset (ESD)/0012/Neutral/evaluation/0012_000004.wav"
 
-F0_path: "/StarGAN_v2/Utils/JDC/bst.t7"
-ASR_config: "/StarGAN_v2/Utils/ASR/speaker_domain_config.yml"
-ASR_path: "/StarGAN_v2/Utils/ASR/epoch_00100.pth"
+F0_path: "/emostargan/Utils/JDC/bst.t7"
+ASR_config: "/emostargan/Utils/ASR/speaker_domain_config.yml"
+ASR_path: "/emostargan/Utils/ASR/epoch_00100.pth"
 
 preprocess_params:
   sr: 24000
@@ -44,8 +44,8 @@ model_params:
   n_repeat: 4
   w_hpf: 0
   F0_channel: 256
-  vocoder_path: "/StarGAN_v2/vocoder/checkpoint-400000steps.pkl"
-  emotion_encoder_path: "/experiments/stargan-v2/esdall_vox5_epochs200/epoch_00198.pth"
+  vocoder_path: "/emostargan/vocoder/checkpoint-400000steps.pkl"
+  emotion_encoder_path: "emostargan/Utils/emotion_encoder/emotion_embedding_second_stage.pth"
 
 loss_params:
   g_loss:

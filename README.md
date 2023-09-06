@@ -35,3 +35,9 @@ python train.py --config_path ./Configs/speaker_domain_config.yml
 ## Inference
 coming soon...
 
+## References
+- [yl4579/StarGANv2-VC](https://github.com/yl4579/StarGANv2-VC/)
+- [kan-bayashi/ParallelWaveGAN](https://github.com/kan-bayashi/ParallelWaveGAN)
+- [keums/melodyExtraction_JDC](https://github.com/keums/melodyExtraction_JDC)
+
+

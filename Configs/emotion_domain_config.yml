@@ -44,7 +44,7 @@ model_params:
   n_repeat: 4
   w_hpf: 0
   F0_channel: 256
-  vocoder_path: "/StarGAN_v2/Vocoder/checkpoint-400000steps.pkl"
+  vocoder_path: "/StarGAN_v2/vocoder/checkpoint-400000steps.pkl"
   emotion_encoder_path: "/experiments/stargan-v2/esdall_vox5_epochs200/epoch_00198.pth"
 
 loss_params:

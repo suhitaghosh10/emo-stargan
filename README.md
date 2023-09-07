@@ -15,14 +15,14 @@ This repository contains the source code of the paper *[Emo-StarGAN: A Semi-Supe
   - [Centre for Speech Technology Voice Cloning Toolkit (VCTK)](https://datashare.ed.ac.uk/handle/10283/2950)
 
 ## Samples
-Samples can be found [here]()
+Samples can be found [here](https://github.com/suhitaghosh10/emo-stargan/tree/main/Samples).
+
+## Demo
+The demo can be found [here]([Demo/EmoStarGAN Demo.ipynb](https://github.com/suhitaghosh10/emo-stargan/blob/main/Demo/EmoStarGAN%20Demo.ipynb).
 
 ## Pre-requisites:
 1. Python >= 3.7
 2. Install the python dependencies mentioned in the requirements.txt
-
-## Demo
-The demo can be found [here](Demo/EmoStarGAN Demo.ipynb)
 
 ## Training:
 

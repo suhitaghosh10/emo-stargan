@@ -42,10 +42,13 @@ The Emo-StarGAN model weights can be downloaded from [here](https://drive.google
 
 
 ## Common Errors
-When the speaker index in `train_list.txt` or `val_list.txt` is greater than the number of speakers ( the hyperparameter `num_speaker_domains` mentioned in `speaker_domain_config.yml`).
-The speaker index starts with 0 (not with 1!) in the training and validation lists.
+When the speaker index in `train_list.txt` or `val_list.txt` is greater than the number of speakers ( the hyperparameter `num_speaker_domains` mentioned in `speaker_domain_config.yml`), the following error is encountered:
 
-**Error message:** `[train]:   0%| | 0/66 [00:00<?, ?it/s]../aten/src/ATen/native/cuda/IndexKernel.cu:92: operator(): block: [0,0,0], thread: [0,0,0] Assertion index >= -sizes[i] && index < sizes[i] && "index out of bounds" failed.`
+```bash
+[train]:   0%| | 0/66 [00:00<?, ?it/s]../aten/src/ATen/native/cuda/IndexKernel.cu:92: operator(): block: [0,0,0], thread: [0,0,0] Assertion index >= -sizes[i] && index < sizes[i] && "index out of bounds" failed.
+```
+
+Also note that the speaker index starts with 0 (not with 1!) in the training and validation lists.
 
 
 ## References and Acknowledgements

@@ -1,3 +1,12 @@
+"""
+EmoStarGAN
+Copyright (c) 2020-present NAVER Corp.
+This work is licensed under the Creative Commons Attribution-NonCommercial
+4.0 International License. To view a copy of this license, visit
+http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to
+Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+"""
+
 import os
 import os.path as osp
 import yaml
@@ -8,7 +17,7 @@ import warnings
 warnings.simplefilter('ignore')
 
 from munch import Munch
-from Models.models import StyleEncoder
+from Models.style_module import StyleEncoder
 from Utils.emotion_encoder.dataset import build_dataloader
 from optimizers import build_optimizer
 from Utils.emotion_encoder.model import build_model
@@ -27,7 +36,7 @@ logger.addHandler(handler)
 torch.backends.cudnn.benchmark = True
 
 @click.command()
-@click.option('-p', '--config_path', default='/project/sghosh/code/emostargan/Utils/emotion_encoder/config.yml', type=str)
+@click.option('-p', '--config_path', default='config.yml', type=str)
 
 def main(config_path):
     config = yaml.safe_load(open(config_path))

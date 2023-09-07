@@ -1,3 +1,12 @@
+"""
+EmoStarGAN
+Copyright (c) 2020-present NAVER Corp.
+This work is licensed under the Creative Commons Attribution-NonCommercial
+4.0 International License. To view a copy of this license, visit
+http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to
+Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+"""
+
 import torch
 import random
 import librosa
@@ -10,16 +19,9 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+from Utils.constants import MEL_PARAMS
 np.random.seed(1)
 random.seed(1)
-
-MEL_PARAMS = {
-    "n_mels": 80,
-    "n_fft": 2048,
-    "win_length": 1200,
-    "hop_length": 300
-}
-P0  = 2e-5
 
 
 class MelDataset(torch.utils.data.Dataset):
@@ -118,9 +120,8 @@ def build_dataloader(path_list,
                      num_workers=1,
                      device='cpu',
                      collate_config={},
-                     dataset_config={},
                      domain=None,
-                     random_start= True):
+                     random_start=True):
 
     dataset = MelDataset(path_list, validation=validation, domain =domain, random_start=random_start)
     collate_fn = Collater(**collate_config)

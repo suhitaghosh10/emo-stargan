@@ -1,8 +1,5 @@
 #coding: utf-8
 
-import os
-import time
-import random
 import random
 import torch
 import torchaudio
@@ -10,10 +7,9 @@ import torchaudio
 import librosa
 import numpy as np
 import soundfile as sf
-import torch.nn.functional as F
 
-from torch import nn
 from torch.utils.data import DataLoader
+from Utils.constants import MEL_PARAMS, EMO_DICT, EMO_DB_DICT
 
 import logging
 logger = logging.getLogger(__name__)
@@ -21,33 +17,6 @@ logger.setLevel(logging.DEBUG)
 
 np.random.seed(1)
 random.seed(1)
-
-SPECT_PARAMS = {
-    "n_fft": 2048,
-    "win_length": 1200,
-    "hop_length": 300
-}
-MEL_PARAMS = {
-    "n_mels": 80,
-    "n_fft": 2048,
-    "win_length": 1200,
-    "hop_length": 300
-}
-
-EMO_DICT = {
-    "Surprise" : 0,
-    "Sad" : 1,
-    "Neutral" : 2,
-    "Happy" : 3,
-    "Angry" : 4
-}
-
-EMO_DB_DICT = {
-    "W" : 0,
-    "F" : 1,
-    "T" : 2,
-    "N" : 3
-}
 
 class MelDataset(torch.utils.data.Dataset):
     def __init__(self,
@@ -80,7 +49,7 @@ class MelDataset(torch.utils.data.Dataset):
         if self.domain == "emotions":
             sp_label = int(data[0].split("/")[-1].split("_")[0]) - 11
         elif "ESD" in data[0]:
-            sp_label = EMO_DICT[data[0].split("/")[7]]
+            sp_label = EMO_DICT[data[0].split("/")[-3]]
         elif "EmoDB" in data[0]:
             sp_label = EMO_DB_DICT[data[0].split("/")[-1][5]]
         else:
@@ -170,7 +139,6 @@ def build_dataloader(path_list,
                      num_workers=1,
                      device='cpu',
                      collate_config={},
-                     dataset_config={},
                      domain=None):
 
     dataset = MelDataset(path_list, validation=validation, domain =domain)

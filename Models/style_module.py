@@ -1,5 +1,5 @@
 """
-StarGAN v2
+EmoStarGAN
 Copyright (c) 2020-present NAVER Corp.
 This work is licensed under the Creative Commons Attribution-NonCommercial
 4.0 International License. To view a copy of this license, visit

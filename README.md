@@ -21,6 +21,9 @@ Samples can be found [here]()
 1. Python >= 3.7
 2. Install the python dependencies mentioned in the requirements.txt
 
+## Demo
+The demo can be found [here](Demo/EmoStarGAN Demo.ipynb)
+
 ## Training:
 
 ### Before Training

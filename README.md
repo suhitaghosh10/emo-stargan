@@ -33,17 +33,17 @@ Samples can be found [here]()
 ```bash
 python train.py --config_path ./Configs/speaker_domain_config.yml
 ```
-## Inference
-coming soon...
 
 ### Model Weights
 The Emo-StarGAN model weights can be downloaded from [here](https://drive.google.com/drive/folders/1FKETSKT71L4GjSTexbJG6LcMWr0b1u7r?usp=sharing). 
+
 
 ## Common Errors
 When the speaker index in `train_list.txt` or `val_list.txt` is greater than the number of speakers ( the hyperparameter `num_speaker_domains` mentioned in `speaker_domain_config.yml`).
 The speaker index starts with 0 (not with 1!) in the training and validation lists.
 
 **Error message:** `[train]:   0%| | 0/66 [00:00<?, ?it/s]../aten/src/ATen/native/cuda/IndexKernel.cu:92: operator(): block: [0,0,0], thread: [0,0,0] Assertion index >= -sizes[i] && index < sizes[i] && "index out of bounds" failed.`
+
 
 ## References
 - [yl4579/StarGANv2-VC](https://github.com/yl4579/StarGANv2-VC/)

@@ -45,7 +45,7 @@ The speaker index starts with 0 (not with 1!) in the training and validation lis
 **Error message:** `[train]:   0%| | 0/66 [00:00<?, ?it/s]../aten/src/ATen/native/cuda/IndexKernel.cu:92: operator(): block: [0,0,0], thread: [0,0,0] Assertion index >= -sizes[i] && index < sizes[i] && "index out of bounds" failed.`
 
 
-## References
-- [yl4579/StarGANv2-VC](https://github.com/yl4579/StarGANv2-VC/)
+## References and Acknowledgements
+- Our repository is heavily based on this great repo [yl4579/StarGANv2-VC](https://github.com/yl4579/StarGANv2-VC/)
 - [kan-bayashi/ParallelWaveGAN](https://github.com/kan-bayashi/ParallelWaveGAN)
 - [keums/melodyExtraction_JDC](https://github.com/keums/melodyExtraction_JDC)

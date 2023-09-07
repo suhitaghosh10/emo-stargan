@@ -1,15 +1,8 @@
-import os
-from scipy.io import wavfile
-
 from pydub import AudioSegment
 from pydub.silence import split_on_silence
 import os
 import io
-from functools import partial
-from joblib import Parallel, delayed
 import logging
-import numpy as np
-import random
 
 def split(sound):
     dBFS = sound.dBFS
@@ -70,6 +63,14 @@ def save_chunks_speakers(spkrs):
     except Exception as e:
         logging.error(e, exc_info=True)  # log stack trace
     return 0
+"""
+StarGAN v2
+Copyright (c) 2020-present NAVER Corp.
+This work is licensed under the Creative Commons Attribution-NonCommercial
+4.0 International License. To view a copy of this license, visit
+http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to
+Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+"""
 
 def generate_train_test_split():
     for spk in __SPEAKERS__:

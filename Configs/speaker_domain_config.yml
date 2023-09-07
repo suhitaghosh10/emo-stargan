@@ -50,7 +50,8 @@ model_params:
   n_repeat: 4
   w_hpf: 0
   F0_channel: 256
-  vocoder_path: "emostargan/Utils/Vocoder/checkpoint-2500000steps.pkl"
+
+  vocoder_path: "emostargan/Utils/vocoder/checkpoint-2500000steps.pkl"
   emotion_encoder_path: "emostargan/Utils/emotion_encoder/emotion_embedding_second_stage.pth"
 
 

@@ -1,10 +1,17 @@
-import math
+"""
+EmoStarGAN
+Copyright (c) 2020-present NAVER Corp.
+This work is licensed under the Creative Commons Attribution-NonCommercial
+4.0 International License. To view a copy of this license, visit
+http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to
+Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+"""
+
 import copy
 import torch
 import torch.nn as nn
 from munch import Munch
 from Models.style_module import StyleEncoder
-
 
 class EmoEncoder(nn.Module):
     def __init__(self):
@@ -12,8 +19,7 @@ class EmoEncoder(nn.Module):
 
         self.encoder = StyleEncoder(64, 64, 5, 512)
         # first stage pre-trained emotion style encoder
-        model_params = torch.load("/project/sghosh/code/emostargan/Utils/emotion_encoder/emotion_style_encoder_pretrained_first_stage.pth",
-                                  map_location='cpu')['model']['style_encoder']
+        model_params = torch.load('emotion_style_encoder_pretrained_first_stage.pth', map_location='cpu')['model']['style_encoder']
         self.encoder.load_state_dict(model_params)
 
 

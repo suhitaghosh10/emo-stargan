@@ -1,7 +1,6 @@
 import torch
 import string
 import warnings
-import torchaudio
 import numpy as np
 import parselmouth
 import pandas as pd

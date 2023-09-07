@@ -1,14 +1,23 @@
 #coding:utf-8
+"""
+EmoStarGAN
+Copyright (c) 2020-present NAVER Corp.
+This work is licensed under the Creative Commons Attribution-NonCommercial
+4.0 International License. To view a copy of this license, visit
+http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to
+Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+"""
 
 import librosa
 import torch
 import torchaudio
 from munch import Munch
-from transforms import build_transforms
+from Data.transforms import build_transforms
 from Utils.constants import *
 from Models.features import get_spectral_centroid, get_loudness
 
 import torch.nn.functional as F
+
 def compute_d_loss(nets, args, x_real, y_org, sp_org, y_trg, z_trg=None, x_ref=None, use_r1_reg=True, use_adv_cls=False, use_con_reg=False, use_aux_cls=False):
     args = Munch(args)
 

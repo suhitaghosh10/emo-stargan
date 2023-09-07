@@ -11,6 +11,7 @@ domain: "emotions"
 train_data: "Dataset/Emotional Speech Dataset (ESD)/English_sub_set/train_list.txt"
 val_data: "Dataset/Emotional Speech Dataset (ESD)/English_sub_set/val_list.txt"
 
+first_stage_model_path: "/project/sghosh/code/emostargan/Utils/emotion_encoder/emotion_style_encoder_pretrained_first_stage.pth"
 optimizer_params:
   lr: 0.0001
 

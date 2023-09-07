@@ -18,7 +18,7 @@ This repository contains the source code of the paper *[Emo-StarGAN: A Semi-Supe
 Samples can be found [here](https://github.com/suhitaghosh10/emo-stargan/tree/main/Samples).
 
 ## Demo
-The demo can be found [here]([Demo/EmoStarGAN Demo.ipynb](https://github.com/suhitaghosh10/emo-stargan/blob/main/Demo/EmoStarGAN%20Demo.ipynb).
+The demo can be found at [Demo/EmoStarGAN Demo.ipynb](https://github.com/suhitaghosh10/emo-stargan/blob/main/Demo/EmoStarGAN%20Demo.ipynb).
 
 ## Pre-requisites:
 1. Python >= 3.7

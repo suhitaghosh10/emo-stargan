@@ -27,7 +27,7 @@ The demo can be found at [Demo/EmoStarGAN Demo.ipynb](https://github.com/suhitag
 ## Training:
 
 ### Before Training
-1. Before starting the training, please specify the number of target speaskers in `num_speaker_domains` and other details such as training and validation data in `config.yml` file.
+1. Before starting the training, please specify the number of target speakers in `num_speaker_domains` and other details such as training and validation data in `config.yml` file.
 2. Download VCTK and ESD datasets. For VCTK dataset preprocessing is needed, which can be carried out using Preprocess/getdata.py. The dataset paths need to be adjusted in train `train_list.txt` and validation `val_list.txt` lists present in Data/.
 3. Download and copy the emotion embeddings [weights](https://drive.google.com/drive/folders/1FEVATENYW6vCiTFeJNoa64piOiV_Joyh?usp=sharing) to the folder Utils/emotion_encoder
 4. Download and copy the vocoder [weights](https://drive.google.com/drive/folders/1xcMLR-jkRC5FmTcyp1e8neKT9mbwV9bb?usp=sharing) to the folder Utils/Vocoder

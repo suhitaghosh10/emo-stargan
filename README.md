@@ -38,7 +38,7 @@ python train.py --config_path ./Configs/speaker_domain_config.yml
 ```
 
 ### Model Weights
-The Emo-StarGAN model weights can be downloaded from [here](https://drive.google.com/drive/folders/1FKETSKT71L4GjSTexbJG6LcMWr0b1u7r?usp=sharing). 
+The Emo-StarGAN model weight can be downloaded from [here](https://drive.google.com/drive/folders/1FKETSKT71L4GjSTexbJG6LcMWr0b1u7r?usp=sharing). 
 
 
 ## Common Errors

@@ -21,7 +21,7 @@ Samples can be found [here](https://github.com/suhitaghosh10/emo-stargan/tree/ma
 The demo can be found at [Demo/EmoStarGAN Demo.ipynb](https://github.com/suhitaghosh10/emo-stargan/blob/main/Demo/EmoStarGAN%20Demo.ipynb).
 
 ## Pre-requisites:
-1. Python >= 3.7
+1. Python >= 3.9
 2. Install the python dependencies mentioned in the requirements.txt
 
 ## Training:
